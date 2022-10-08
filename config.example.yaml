@@ -1,0 +1,51 @@
+app: cd
+service: deploy
+namespace: beta
+project: cd-template
+version: v1
+replicas: 1
+testReplicas: 2
+serviceAccount: false
+command:
+  - test
+  - "1234"
+args:
+  - "1"
+  - "2"
+  - "3"
+image:
+  path: test
+  tag: latest
+ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  - port: 9000
+    targetPort: 9000
+    name: grpc
+metrics:
+  scrape: true
+#  path: /metrics
+#  port: 8000
+importEnvNames:
+  - stage
+  - other
+configData:
+  name: deploy-config
+  path: workdir/config
+  data:
+    config1.yaml: |
+      dafjlkdjaskfjdklasjfkldasj
+      asdfkasjdfklajsd
+      asdfasdfa
+workloadType: statefulset
+hpa: true
+containers:
+  - name: demo
+    image: demo:v1
+    ports:
+      - containerPort: 8888
+        hostIp: 0.0.0.0
+        hostPort: 8888
+        name: demo
+        protocol: TCP

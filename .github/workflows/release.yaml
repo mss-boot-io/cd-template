@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - name: Test
+        run: go test -v ./...
+  tag:
+    runs-on: ubuntu-latest
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/')
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - id: tag
+        env:
+          ref: ${{ github.ref }}
+        run: echo "::set-output name=tag::${ref##*/}"
+
+  pages:
+    runs-on: ubuntu-latest
+    needs: tag
+    strategy:
+      matrix:
+        os: [ linux, darwin, windows ]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - name: New Artifact Dir
+        run: mkdir artifact
+      - name: Build ${{ matrix.os }}
+        env:
+          CGO_ENABLED: 0
+          GOOS: ${{ matrix.os }}
+          GOARCH: amd64
+        run: |
+          if [ ${GOOS} == windows ];then
+            export app=cd-template.exe
+          else
+            export app=cd-template
+          fi
+          go build -o ${app} .
+          tar -zcvf ${GOOS}_${GOARCH}.tar.gz ./${app}
+          rm -rf ./${app}
+          mv ${GOOS}_${GOARCH}.tar.gz artifact
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        env:
+          CGO_ENABLED: 0
+          GOOS: ${{ matrix.os }}
+          GOARCH: amd64
+        with:
+          name: ${{ needs.tag.outputs.tag }}
+          path: ${{ github.workspace }}/artifact
+          if-no-files-found: error
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [tag, pages]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: New Public
+        run: mkdir -p public/${{ needs.tag.outputs.tag }}
+
+      - name: download binary
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.tag.outputs.tag }}
+          path: public/${{ needs.tag.outputs.tag }}
+
+      - name: Create Readme
+        run:
+          cp README.md ./public/
+      - name: Create latest
+        run:
+          cp -r ./public/${{ needs.tag.outputs.tag }} ./public/latest
+      - name: Push Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          keep_files: true
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            public/latest/linux_amd64.tar.gz
+            public/latest/windows_amd64.tar.gz
+            public/latest/darwin_amd64.tar.gz

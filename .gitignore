@@ -1,3 +1,4 @@
+### Go template
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -13,3 +14,17 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+.vscode
+.idea
+
+cd-template*
+.DS_Store
+
+*.local.yaml
+config.admin.yml
+
+dist/
+beta/
+staging/
+prod/
