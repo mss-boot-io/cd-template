@@ -22,7 +22,6 @@ cd-template*
 .DS_Store
 
 *.local.yaml
-config.admin.yml
 
 dist/
 beta/
