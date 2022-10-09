@@ -12,7 +12,7 @@ import (
 
 // Synth chart generate
 func Synth(stage string) {
-	app := cdk8s.NewApp(&cdk8s.AppProps{Outdir: jsii.String(filepath.Join("dist", config.Cfg.Service, stage))})
+	app := cdk8s.NewApp(&cdk8s.AppProps{Outdir: jsii.String(filepath.Join("dist", stage, config.Cfg.Service))})
 	chartProps := &cdk8s.ChartProps{
 		Labels: &map[string]*string{
 			"app":     &config.Cfg.Service,
