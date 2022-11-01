@@ -8,10 +8,9 @@
 package chart
 
 import (
-	"github.com/aws/constructs-go/constructs/v3"
+	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
-	"github.com/cdk8s-team/cdk8s-core-go/cdk8s"
-
+	"github.com/cdk8s-team/cdk8s-core-go/cdk8s/v2"
 	"github.com/mss-boot-io/cd-template/imports/k8s"
 	"github.com/mss-boot-io/cd-template/pkg/config"
 )
@@ -48,7 +47,7 @@ func NewServiceChart(scope constructs.Construct, id string, props *cdk8s.ChartPr
 	}
 	k8s.NewKubeServiceAccount(chart, jsii.String("service-account"), &k8s.KubeServiceAccountProps{
 		Metadata: &k8s.ObjectMeta{
-			Name:   jsii.String(config.Cfg.App + "-" + config.Cfg.Service),
+			Name:   jsii.String(config.Cfg.GetName()),
 			Labels: props.Labels,
 		},
 	})

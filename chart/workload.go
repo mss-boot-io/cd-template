@@ -11,9 +11,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/aws/constructs-go/constructs/v3"
+	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
-	"github.com/cdk8s-team/cdk8s-core-go/cdk8s"
+	"github.com/cdk8s-team/cdk8s-core-go/cdk8s/v2"
 
 	"github.com/mss-boot-io/cd-template/imports/k8s"
 	"github.com/mss-boot-io/cd-template/pkg/config"
@@ -101,7 +101,7 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 
 	var serviceAccountName *string
 	if config.Cfg.ServiceAccount {
-		serviceAccountName = jsii.String(config.Cfg.App + "-" + config.Cfg.Service)
+		serviceAccountName = jsii.String(config.Cfg.GetName())
 	}
 	if config.Cfg.ServiceAccountName != "" {
 		serviceAccountName = jsii.String(config.Cfg.ServiceAccountName)
