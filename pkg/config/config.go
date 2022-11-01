@@ -11,10 +11,11 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/lwnmengjing/core-go/config"
+	"github.com/spf13/viper"
 )
 
 var Cfg Config
@@ -41,6 +42,20 @@ type Config struct {
 	Command            []*string           `json:"command" yaml:"command"`
 	Args               []*string           `json:"args" yaml:"args"`
 	Containers         []Container         `json:"containers" yaml:"containers"`
+}
+
+func (c *Config) GetName() string {
+	a := make([]string, 0)
+	if c.Project != "" {
+		a = append(a, c.Project)
+	}
+	if c.App != "" {
+		a = append(a, c.App)
+	}
+	if c.Service != "" {
+		a = append(a, c.Service)
+	}
+	return strings.Join(a, "-")
 }
 
 type Container struct {
@@ -114,25 +129,47 @@ var (
 
 // NewConfig set config
 func NewConfig(path *string) {
-	var err error
-	config.DefaultConfig, err = config.NewConfig()
+	viper.SetConfigType("yaml")
+	f, err := os.OpenFile(*path, os.O_RDONLY, 0)
 	if err != nil {
-		log.Fatalln(err)
-	}
-	if path != nil && *path != "" {
-		err = config.LoadFile(*path)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		err = config.Scan(&Cfg)
-		if err != nil {
-			log.Fatalln(err)
-		}
+		log.Fatalf("open config file error: %v", err)
 	}
 
-	Cfg.App = config.Get("app").String(*app)
-	Cfg.Service = config.Get("service").String(*service)
-	Cfg.Project = config.Get("project").String(*project)
+	err = viper.ReadConfig(f)
+	if err != nil {
+		log.Fatalf("read config file error: %v", err)
+	}
+
+	//set default config
+	viper.SetDefault("app", *app)
+	viper.SetDefault("service", *service)
+	viper.SetDefault("project", *project)
+	viper.SetDefault("image.path", *image)
+	viper.SetDefault("version", *version)
+
+	err = viper.Unmarshal(&Cfg)
+	if err != nil {
+		log.Fatalf("Fatal error config file: %s \n", err)
+	}
+
+	//config.DefaultConfig, err = config.NewConfig()
+	//if err != nil {
+	//	log.Fatalln(err)
+	//}
+	//if path != nil && *path != "" {
+	//	err = config.LoadFile(*path)
+	//	if err != nil {
+	//		log.Fatalln(err)
+	//	}
+	//	err = config.Scan(&Cfg)
+	//	if err != nil {
+	//		log.Fatalln(err)
+	//	}
+	//}
+
+	//Cfg.App = config.Get("app").String(*app)
+	//Cfg.Service = config.Get("service").String(*service)
+	//Cfg.Project = config.Get("project").String(*project)
 	if len(Cfg.Ports) == 0 && (*httpPort > 0 || *grpcPort > 0) {
 		Cfg.Ports = make([]Port, 0)
 		if *httpPort > 0 {
@@ -160,8 +197,8 @@ func NewConfig(path *string) {
 			Cfg.Metrics.Path = "/metrics"
 		}
 	}
-	Cfg.Image.Path = config.Get("image", "path").String(*image)
-	Cfg.Version = config.Get("version").String(*version)
+	//Cfg.Image.Path = config.Get("image", "path").String(*image)
+	//Cfg.Version = config.Get("version").String(*version)
 	if len(Cfg.ImportEnvNames) == 0 {
 		Cfg.ImportEnvNames = strings.Split(*importEnvNames, ",")
 	}

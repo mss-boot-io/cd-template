@@ -1,4 +1,4 @@
-app: mss-boot
+project: mss-boot
 service: admin
 ports:
   - port: 8080
