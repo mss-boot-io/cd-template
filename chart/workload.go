@@ -98,6 +98,22 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 			})
 		}
 	}
+	for i := range config.Cfg.Storages {
+		volumes = append(volumes, &k8s.Volume{
+			Name: &config.Cfg.Storages[i].Name,
+			PersistentVolumeClaim: &k8s.PersistentVolumeClaimVolumeSource{
+				ClaimName: &config.Cfg.Storages[i].Name,
+			},
+		})
+		vm := &k8s.VolumeMount{
+			MountPath: &config.Cfg.Storages[i].Path,
+			Name:      &config.Cfg.Storages[i].Name,
+		}
+		if config.Cfg.Storages[i].SubPath != "" {
+			vm.SubPath = &config.Cfg.Storages[i].SubPath
+		}
+		volumeMounts = append(volumeMounts, vm)
+	}
 
 	var serviceAccountName *string
 	if config.Cfg.ServiceAccount {

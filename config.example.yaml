@@ -38,6 +38,9 @@ configData:
       dafjlkdjaskfjdklasjfkldasj
       asdfkasjdfklajsd
       asdfasdfa
+storages:
+  - name: chainide-projects
+    path: /app/projects
 workloadType: statefulset
 hpa: true
 containers:

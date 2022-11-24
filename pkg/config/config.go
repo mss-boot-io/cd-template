@@ -38,10 +38,17 @@ type Config struct {
 	Metrics            Metrics             `json:"metrics" yaml:"metrics"`
 	ImportEnvNames     []string            `json:"importEnvNames" yaml:"importEnvNames"`
 	Config             []ConfigmapData     `json:"config" yaml:"config"`
+	Storages           []Storage           `json:"storages" yaml:"storages"`
 	WorkloadType       string              `json:"workloadType" yaml:"workloadType"`
 	Command            []*string           `json:"command" yaml:"command"`
 	Args               []*string           `json:"args" yaml:"args"`
 	Containers         []Container         `json:"containers" yaml:"containers"`
+}
+
+type Storage struct {
+	Name    string `json:"name" yaml:"name"`
+	Path    string `json:"path" yaml:"path"`
+	SubPath string `json:"subPath" yaml:"subPath"`
 }
 
 func (c *Config) GetName() string {

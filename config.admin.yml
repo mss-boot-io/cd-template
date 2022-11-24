@@ -9,3 +9,19 @@ metrics:
   port: 5000
   path: /metrics
 hpa: false
+storages:
+  - name: chainide-projects
+    path: /app/projects
+    subPath: abc
+deploy:
+  stage:
+    alpha:
+      cluster: matrix-alpha
+      namespace: alpha
+      autoSync: true
+    beta:
+      cluster: matrix-beta
+      namespace: beta
+    prod:
+      cluster: matrix-prod
+      namespace: prod
