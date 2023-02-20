@@ -159,6 +159,10 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 	if !config.Cfg.Hpa && config.Cfg.Replicas > 0 {
 		replicas = jsii.Number(float64(config.Cfg.Replicas))
 	}
+	imagePullSecrets := make([]*k8s.LocalObjectReference, len(config.Cfg.Image.Secrets))
+	for i := range config.Cfg.Image.Secrets {
+		imagePullSecrets[i] = &k8s.LocalObjectReference{Name: &config.Cfg.Image.Secrets[i]}
+	}
 	// default container
 	containers = append(containers, &k8s.Container{
 		Name:         jsii.String(config.Cfg.Service),
@@ -193,6 +197,7 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 						ServiceAccountName: serviceAccountName,
 						Containers:         &containers,
 						Volumes:            &volumes,
+						ImagePullSecrets:   &imagePullSecrets,
 					},
 				},
 			},
@@ -217,6 +222,7 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 						ServiceAccountName: serviceAccountName,
 						Containers:         &containers,
 						Volumes:            &volumes,
+						ImagePullSecrets:   &imagePullSecrets,
 					},
 				},
 			},

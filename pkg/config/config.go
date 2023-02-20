@@ -91,9 +91,9 @@ type Port struct {
 }
 
 type Image struct {
-	Path   string `json:"path" yaml:"path"`
-	Tag    string `json:"tag" yaml:"tag"`
-	Secret string `json:"secret" yaml:"secret"`
+	Path    string   `json:"path" yaml:"path"`
+	Tag     string   `json:"tag" yaml:"tag"`
+	Secrets []string `json:"secrets" yaml:"secrets"`
 }
 
 func (e Image) String() string {
@@ -116,22 +116,23 @@ type ConfigmapData struct {
 }
 
 var (
-	app             = flag.String("app", "", "application")
-	project         = flag.String("project", "", "project")
-	service         = flag.String("service", "", "service")
-	version         = flag.String("version", "v1", "service version")
-	httpPort        = flag.Uint("httpPort", 0, "http server listen port")
-	grpcPort        = flag.Uint("grpcPort", 0, "grpc server listen port")
-	image           = flag.String("image", "", "image:tag")
-	importEnvNames  = flag.String("importEnvNames", "", "import env names, split ','")
-	configDataFiles = flag.String("configDataFiles", "", "config data file path, multi split ','")
-	configPath      = flag.String("configPath", "", "application config path")
-	configmapName   = flag.String("configmapName", "", "exist configmap name")
-	replicas        = flag.Uint("replicas", 1, "replicas")
-	workloadType    = flag.String("workloadType", "deployment", "workload type, e.g. deployment, statefulset")
-	hpa             = flag.Bool("hpa", false, "enable hpa")
-	metricsScrape   = flag.Bool("metricsScrape", false, "enable metrics export")
-	_               = flag.String("namespace", "", "")
+	app              = flag.String("app", "", "application")
+	project          = flag.String("project", "", "project")
+	service          = flag.String("service", "", "service")
+	version          = flag.String("version", "v1", "service version")
+	httpPort         = flag.Uint("httpPort", 0, "http server listen port")
+	grpcPort         = flag.Uint("grpcPort", 0, "grpc server listen port")
+	image            = flag.String("image", "", "image:tag")
+	importEnvNames   = flag.String("importEnvNames", "", "import env names, split ','")
+	configDataFiles  = flag.String("configDataFiles", "", "config data file path, multi split ','")
+	configPath       = flag.String("configPath", "", "application config path")
+	configmapName    = flag.String("configmapName", "", "exist configmap name")
+	replicas         = flag.Uint("replicas", 1, "replicas")
+	workloadType     = flag.String("workloadType", "deployment", "workload type, e.g. deployment, statefulset")
+	hpa              = flag.Bool("hpa", false, "enable hpa")
+	metricsScrape    = flag.Bool("metricsScrape", false, "enable metrics export")
+	imagePullSecrets = flag.String("imagePullSecrets", "", "image pull secrets, multi split ','")
+	_                = flag.String("namespace", "", "")
 )
 
 // NewConfig set config
@@ -153,6 +154,7 @@ func NewConfig(path *string) {
 	viper.SetDefault("project", *project)
 	viper.SetDefault("image.path", *image)
 	viper.SetDefault("version", *version)
+	viper.SetDefault("image.secrets", strings.Split(*imagePullSecrets, ","))
 
 	err = viper.Unmarshal(&Cfg)
 	if err != nil {
