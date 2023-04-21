@@ -43,6 +43,7 @@ type Config struct {
 	Command            []*string           `json:"command" yaml:"command"`
 	Args               []*string           `json:"args" yaml:"args"`
 	Containers         []Container         `json:"containers" yaml:"containers"`
+	NodeSelector       map[string]*string  `json:"nodeSelector" yaml:"nodeSelector"`
 }
 
 type Storage struct {
@@ -132,6 +133,7 @@ var (
 	hpa              = flag.Bool("hpa", false, "enable hpa")
 	metricsScrape    = flag.Bool("metricsScrape", false, "enable metrics export")
 	imagePullSecrets = flag.String("imagePullSecrets", "", "image pull secrets, multi split ','")
+	nodeSelector     = flag.String("nodeSelector", "", "node selector, e.g. app0=demo0,app1=demo1")
 	_                = flag.String("namespace", "", "")
 )
 
@@ -261,4 +263,19 @@ func NewConfig(path *string) {
 			},
 		}
 	}
+	if nodeSelector != nil && *nodeSelector != "" {
+		Cfg.NodeSelector = stringToMap(*nodeSelector)
+	}
+}
+
+func stringToMap(s string) map[string]*string {
+	m := make(map[string]*string)
+	for _, v := range strings.Split(s, ",") {
+		vs := strings.Split(v, "=")
+		if len(vs) <= 1 {
+			continue
+		}
+		m[vs[0]] = &vs[1]
+	}
+	return m
 }

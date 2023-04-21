@@ -225,6 +225,7 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 						Containers:         &containers,
 						Volumes:            &volumes,
 						ImagePullSecrets:   &imagePullSecrets,
+						NodeSelector:       &config.Cfg.NodeSelector,
 					},
 				},
 			},
