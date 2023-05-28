@@ -93,12 +93,12 @@ jobs:
       - name: Create latest
         run:
           cp -r ./public/${{ needs.tag.outputs.tag }} ./public/latest
-      - name: Push Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          keep_files: true
+#      - name: Push Pages
+#        uses: peaceiris/actions-gh-pages@v3
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          publish_dir: ./public
+#          keep_files: true
 
       - name: Release
         uses: softprops/action-gh-release@v1
