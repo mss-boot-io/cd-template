@@ -30,14 +30,21 @@ metrics:
 importEnvNames:
   - stage
   - other
-configData:
-  name: deploy-config
-  path: workdir/config
-  data:
-    config1.yaml: |
-      dafjlkdjaskfjdklasjfkldasj
-      asdfkasjdfklajsd
-      asdfasdfa
+config:
+  - name: deploy-config
+    path: workdir/config
+    data:
+      config1.yaml: |
+        dafjlkdjaskfjdklasjfkldasj
+        asdfkasjdfklajsd
+        asdfasdfa
+secret:
+  - name: secret-config
+    path: workdir/secret
+  - name: secret-config2
+    path: workdir/secret2
+    envName: secret2
+    key: key2
 storages:
   - name: chainide-projects
     path: /app/projects
