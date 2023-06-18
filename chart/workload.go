@@ -81,22 +81,59 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 	//config
 	volumeMounts := make([]*k8s.VolumeMount, 0)
 	volumes := make([]*k8s.Volume, 0)
-	if len(config.Cfg.Config) > 0 {
-		readOnly := true
-		for i := range config.Cfg.Config {
-			volumes = append(volumes, &k8s.Volume{
-				Name: &config.Cfg.Config[i].Name,
-				ConfigMap: &k8s.ConfigMapVolumeSource{
-					Name: &config.Cfg.Config[i].Name,
+	readOnly := true
+	optional := true
+	for i := range config.Cfg.Config {
+		if config.Cfg.Config[i].EnvName != "" {
+			env = append(env, &k8s.EnvVar{
+				Name: &config.Cfg.Config[i].EnvName,
+				ValueFrom: &k8s.EnvVarSource{
+					ConfigMapKeyRef: &k8s.ConfigMapKeySelector{
+						Name:     &config.Cfg.Config[i].Name,
+						Key:      &config.Cfg.Config[i].Key,
+						Optional: &optional,
+					},
 				},
 			})
-
-			volumeMounts = append(volumeMounts, &k8s.VolumeMount{
-				MountPath: &config.Cfg.Config[i].Path,
-				Name:      &config.Cfg.Config[i].Name,
-				ReadOnly:  &readOnly,
-			})
+			continue
 		}
+		volumes = append(volumes, &k8s.Volume{
+			Name: &config.Cfg.Config[i].Name,
+			ConfigMap: &k8s.ConfigMapVolumeSource{
+				Name: &config.Cfg.Config[i].Name,
+			},
+		})
+		volumeMounts = append(volumeMounts, &k8s.VolumeMount{
+			MountPath: &config.Cfg.Config[i].Path,
+			Name:      &config.Cfg.Config[i].Name,
+			ReadOnly:  &readOnly,
+		})
+	}
+	for i := range config.Cfg.Secret {
+		if config.Cfg.Secret[i].EnvName != "" {
+			env = append(env, &k8s.EnvVar{
+				Name: &config.Cfg.Secret[i].EnvName,
+				ValueFrom: &k8s.EnvVarSource{
+					SecretKeyRef: &k8s.SecretKeySelector{
+						Name:     &config.Cfg.Secret[i].Name,
+						Key:      &config.Cfg.Secret[i].Key,
+						Optional: &optional,
+					},
+				},
+			})
+			continue
+		}
+		volumes = append(volumes, &k8s.Volume{
+			Name: &config.Cfg.Secret[i].Name,
+			Secret: &k8s.SecretVolumeSource{
+				SecretName: &config.Cfg.Secret[i].Name,
+			},
+		})
+		volumeMounts = append(volumeMounts, &k8s.VolumeMount{
+			MountPath: &config.Cfg.Secret[i].Path,
+			Name:      &config.Cfg.Secret[i].Name,
+			ReadOnly:  &readOnly,
+		})
 	}
 	for i := range config.Cfg.Storages {
 		volumes = append(volumes, &k8s.Volume{

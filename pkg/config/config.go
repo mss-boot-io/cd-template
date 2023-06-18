@@ -9,7 +9,6 @@ package config
 
 import (
 	"flag"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -38,6 +37,7 @@ type Config struct {
 	Metrics            Metrics             `json:"metrics" yaml:"metrics"`
 	ImportEnvNames     []string            `json:"importEnvNames" yaml:"importEnvNames"`
 	Config             []ConfigmapData     `json:"config" yaml:"config"`
+	Secret             []SecretData        `json:"secret" yaml:"secret"`
 	Storages           []Storage           `json:"storages" yaml:"storages"`
 	WorkloadType       string              `json:"workloadType" yaml:"workloadType"`
 	Command            []*string           `json:"command" yaml:"command"`
@@ -111,9 +111,18 @@ type Metrics struct {
 }
 
 type ConfigmapData struct {
-	Name string            `json:"name" yaml:"name"`
-	Path string            `json:"path" yaml:"path"`
-	Data map[string]string `json:"data" yaml:"data"`
+	Name    string            `json:"name" yaml:"name"`
+	Path    string            `json:"path" yaml:"path"`
+	EnvName string            `json:"envName" yaml:"envName"`
+	Key     string            `json:"key" yaml:"key"`
+	Data    map[string]string `json:"data" yaml:"data"`
+}
+
+type SecretData struct {
+	Name    string `json:"name" yaml:"name"`
+	Path    string `json:"path" yaml:"path"`
+	EnvName string `json:"envName" yaml:"envName"`
+	Key     string `json:"key" yaml:"key"`
 }
 
 var (
@@ -128,6 +137,7 @@ var (
 	configDataFiles  = flag.String("configDataFiles", "", "config data file path, multi split ','")
 	configPath       = flag.String("configPath", "", "application config path")
 	configmapName    = flag.String("configmapName", "", "exist configmap name")
+	secretName       = flag.String("secretName", "", "exist secret name")
 	replicas         = flag.Uint("replicas", 1, "replicas")
 	workloadType     = flag.String("workloadType", "deployment", "workload type, e.g. deployment, statefulset")
 	hpa              = flag.Bool("hpa", false, "enable hpa")
@@ -217,11 +227,15 @@ func NewConfig(path *string) {
 		if Cfg.Config == nil {
 			Cfg.Config = make([]ConfigmapData, 0)
 		}
+		if Cfg.Secret == nil {
+			Cfg.Secret = make([]SecretData, 0)
+		}
 		configData := ConfigmapData{
 			Data: make(map[string]string),
 		}
+		var secretData SecretData
 		for _, p := range strings.Split(*configDataFiles, ",") {
-			rb, err := ioutil.ReadFile(p)
+			rb, err := os.ReadFile(p)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -233,7 +247,11 @@ func NewConfig(path *string) {
 		if configmapName != nil && *configmapName != "" {
 			configData.Name = *configmapName
 		}
+		if secretName != nil && *secretName != "" {
+			secretData.Name = *secretName
+		}
 		Cfg.Config = append(Cfg.Config, configData)
+		Cfg.Secret = append(Cfg.Secret, secretData)
 	}
 	if Cfg.Replicas < 1 {
 		Cfg.Replicas = *replicas
