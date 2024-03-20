@@ -15,7 +15,7 @@ jobs:
       - name: Setup
         uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
+          go-version: '1.22'
       - name: Test
         run: go test -v ./...
   tag:
@@ -42,7 +42,7 @@ jobs:
       - name: Setup
         uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
+          go-version: '1.22'
       - name: New Artifact Dir
         run: mkdir artifact
       - name: Build ${{ matrix.os }}
