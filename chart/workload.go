@@ -135,13 +135,36 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 			ReadOnly:  &readOnly,
 		})
 	}
+	volumeClaimTemplates := make([]*k8s.KubePersistentVolumeClaimProps, 0)
 	for i := range config.Cfg.Storages {
-		volumes = append(volumes, &k8s.Volume{
-			Name: &config.Cfg.Storages[i].Name,
-			PersistentVolumeClaim: &k8s.PersistentVolumeClaimVolumeSource{
-				ClaimName: &config.Cfg.Storages[i].Name,
-			},
-		})
+		if config.Cfg.WorkloadType != "statefulset" || config.Cfg.Storages[i].Size == "" {
+			volumes = append(volumes, &k8s.Volume{
+				Name: &config.Cfg.Storages[i].Name,
+				PersistentVolumeClaim: &k8s.PersistentVolumeClaimVolumeSource{
+					ClaimName: &config.Cfg.Storages[i].Name,
+				},
+			})
+		} else {
+			accessModes := []*string{
+				jsii.String("ReadWriteOnce"),
+			}
+			volumeClaimTemplates = append(volumeClaimTemplates, &k8s.KubePersistentVolumeClaimProps{
+				Metadata: &k8s.ObjectMeta{
+					Name: &config.Cfg.Storages[i].Name,
+				},
+				Spec: &k8s.PersistentVolumeClaimSpec{
+					AccessModes: &accessModes,
+					Resources: &k8s.ResourceRequirements{
+						Requests: &map[string]k8s.Quantity{
+							"storage": k8s.Quantity_FromString(&config.Cfg.Storages[i].Size),
+						},
+					},
+					StorageClassName: &config.Cfg.Storages[i].StorageClass,
+					VolumeMode:       jsii.String("Filesystem"),
+				},
+			})
+		}
+
 		vm := &k8s.VolumeMount{
 			MountPath: &config.Cfg.Storages[i].Path,
 			Name:      &config.Cfg.Storages[i].Name,
@@ -239,6 +262,7 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 						ImagePullSecrets:   &imagePullSecrets,
 					},
 				},
+				VolumeClaimTemplates: &volumeClaimTemplates,
 			},
 		})
 	case "daemonset":
