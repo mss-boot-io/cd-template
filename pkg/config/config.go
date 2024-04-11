@@ -24,12 +24,10 @@ type Config struct {
 	Project            string              `json:"project" yaml:"project"`
 	Service            string              `json:"service" yaml:"service"`
 	Version            string              `json:"version" yaml:"version"`
-	Hpa                bool                `json:"hpa" yaml:"hpa"`
+	Hpa                Hpa                 `json:"hpa" yaml:"hpa"`
 	Resources          map[string]Resource `json:"resources" yaml:"resources"`
 	Replicas           uint                `json:"replicas" yaml:"replicas"`
 	TestReplicas       uint                `json:"testReplicas" yaml:"testReplicas"`
-	MinReplicas        uint                `json:"minReplicas" yaml:"minReplicas"`
-	MaxReplicas        uint                `json:"maxReplicas" yaml:"maxReplicas"`
 	ServiceAccount     bool                `json:"serviceAccount" yaml:"serviceAccount"`
 	ServiceAccountName string              `json:"serviceAccountName" yaml:"serviceAccountName"`
 	Image              Image               `json:"image" yaml:"image"`
@@ -125,6 +123,12 @@ type SecretData struct {
 	Path    string `json:"path" yaml:"path"`
 	EnvName string `json:"envName" yaml:"envName"`
 	Key     string `json:"key" yaml:"key"`
+}
+
+type Hpa struct {
+	Enabled     bool `json:"enabled" yaml:"enabled"`
+	MinReplicas uint `json:"minReplicas" yaml:"minReplicas"`
+	MaxReplicas uint `json:"maxReplicas" yaml:"maxReplicas"`
 }
 
 var (
@@ -258,20 +262,20 @@ func NewConfig(path *string) {
 	if Cfg.Replicas < 1 {
 		Cfg.Replicas = *replicas
 	}
-	if Cfg.MinReplicas < 1 {
-		Cfg.MinReplicas = 3
+	if Cfg.Hpa.MinReplicas < 1 {
+		Cfg.Hpa.MinReplicas = 1
 	}
-	if Cfg.MaxReplicas < Cfg.Replicas {
-		Cfg.MaxReplicas = 5
+	if Cfg.Hpa.MaxReplicas < Cfg.Replicas {
+		Cfg.Hpa.MaxReplicas = 3
 	}
 	if workloadType != nil && (Cfg.WorkloadType == "" || *workloadType != "deployment") {
 		Cfg.WorkloadType = *workloadType
 	}
 	if hpa != nil && *hpa {
-		Cfg.Hpa = *hpa
+		Cfg.Hpa.Enabled = *hpa
 	}
 
-	if len(Cfg.Resources) == 0 && Cfg.Hpa {
+	if len(Cfg.Resources) == 0 && Cfg.Hpa.Enabled {
 		Cfg.Resources = map[string]Resource{
 			"limits": {
 				CPU:    "1",

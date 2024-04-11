@@ -216,7 +216,7 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 		annotations["prometheus.io/path"] = jsii.String(config.Cfg.Metrics.Path)
 	}
 	var replicas *float64
-	if !config.Cfg.Hpa && config.Cfg.Replicas > 0 {
+	if !config.Cfg.Hpa.Enabled && config.Cfg.Replicas > 0 {
 		replicas = jsii.Number(float64(config.Cfg.Replicas))
 	}
 	imagePullSecrets := make([]*k8s.LocalObjectReference, 0)

@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 	config.NewConfig(configPath)
 	stage.Synth("prod")
-	config.Cfg.Hpa = false
+	config.Cfg.Hpa.Enabled = false
 	config.Cfg.Resources = nil
 	config.Cfg.Replicas = config.Cfg.TestReplicas
 	stage.Synth("test")

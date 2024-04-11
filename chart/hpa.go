@@ -18,8 +18,8 @@ func NewHpaChart(scope constructs.Construct, id string, props *cdk8s.ChartProps)
 			Name:   &config.Cfg.Service,
 		},
 		Spec: &k8s.HorizontalPodAutoscalerSpecV2{
-			MinReplicas: jsii.Number(float64(config.Cfg.MinReplicas)),
-			MaxReplicas: jsii.Number(float64(config.Cfg.MaxReplicas)),
+			MinReplicas: jsii.Number(float64(config.Cfg.Hpa.MinReplicas)),
+			MaxReplicas: jsii.Number(float64(config.Cfg.Hpa.MaxReplicas)),
 			ScaleTargetRef: &k8s.CrossVersionObjectReferenceV2{
 				Kind:       jsii.String(config.Cfg.WorkloadType),
 				Name:       jsii.String(config.Cfg.Service),

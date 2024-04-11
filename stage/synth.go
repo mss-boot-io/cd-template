@@ -45,7 +45,7 @@ func Synth(stage string, paths ...string) {
 		chart.NewConfigmapChart(app, config.Cfg.GetName()+"-configmap", chartProps)
 	}
 	chart.NewWorkloadChart(app, config.Cfg.GetName()+"-workload", chartProps)
-	if config.Cfg.Hpa {
+	if config.Cfg.Hpa.Enabled {
 		chart.NewHpaChart(app, config.Cfg.GetName()+"-hpa", chartProps)
 	}
 	app.Synth()
