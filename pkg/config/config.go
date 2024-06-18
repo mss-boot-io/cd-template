@@ -174,7 +174,9 @@ func NewConfig(path *string) {
 	viper.SetDefault("version", *version)
 	viper.SetDefault("image.secrets", strings.Split(*imagePullSecrets, ","))
 
-	err = viper.Unmarshal(&Cfg)
+	currentConfig := Config{}
+	err = viper.Unmarshal(&currentConfig)
+	Cfg = currentConfig
 	if err != nil {
 		log.Fatalf("Fatal error config file: %s \n", err)
 	}
