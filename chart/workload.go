@@ -135,8 +135,24 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 			ReadOnly:  &readOnly,
 		})
 	}
+	storageName := make(map[string]struct{}, 0)
 	volumeClaimTemplates := make([]*k8s.KubePersistentVolumeClaimProps, 0)
 	for i := range config.Cfg.Storages {
+		vm := &k8s.VolumeMount{
+			MountPath: &config.Cfg.Storages[i].Path,
+			Name:      &config.Cfg.Storages[i].Name,
+		}
+		if config.Cfg.Storages[i].SubPath != "" {
+			vm.SubPath = &config.Cfg.Storages[i].SubPath
+		}
+		volumeMounts = append(volumeMounts, vm)
+
+		_, ok := storageName[config.Cfg.Storages[i].Name]
+		if ok {
+			continue
+		} else {
+			storageName[config.Cfg.Storages[i].Name] = struct{}{}
+		}
 		if config.Cfg.WorkloadType != "statefulset" || config.Cfg.Storages[i].Size == "" {
 			volumes = append(volumes, &k8s.Volume{
 				Name: &config.Cfg.Storages[i].Name,
@@ -164,15 +180,6 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 				},
 			})
 		}
-
-		vm := &k8s.VolumeMount{
-			MountPath: &config.Cfg.Storages[i].Path,
-			Name:      &config.Cfg.Storages[i].Name,
-		}
-		if config.Cfg.Storages[i].SubPath != "" {
-			vm.SubPath = &config.Cfg.Storages[i].SubPath
-		}
-		volumeMounts = append(volumeMounts, vm)
 	}
 
 	var serviceAccountName *string

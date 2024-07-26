@@ -48,5 +48,17 @@ func Synth(stage string, paths ...string) {
 	if config.Cfg.Hpa.Enabled {
 		chart.NewHpaChart(app, config.Cfg.GetName()+"-hpa", chartProps)
 	}
+
+	if len(config.Cfg.Storages) > 0 && config.Cfg.WorkloadType != "statefulset" {
+		storageName := make(map[string]struct{}, 0)
+		for i := range config.Cfg.Storages {
+			_, ok := storageName[config.Cfg.Storages[i].Name]
+			if ok || config.Cfg.Storages[i].Size == "" {
+				continue
+			}
+			storageName[config.Cfg.Storages[i].Name] = struct{}{}
+			chart.NewPvcChart(app, config.Cfg.GetName()+"-pvc-"+config.Cfg.Storages[i].Name, chartProps, config.Cfg.Storages[i])
+		}
+	}
 	app.Synth()
 }
