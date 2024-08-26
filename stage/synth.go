@@ -32,7 +32,9 @@ func Synth(stage string, paths ...string) {
 			},
 		}
 	}
-	chart.NewServiceChart(app, config.Cfg.GetName()+"-service", chartProps)
+	if len(config.Cfg.Ports) > 0 {
+		chart.NewServiceChart(app, config.Cfg.GetName()+"-service", chartProps)
+	}
 	needConfigmap := false
 	if len(config.Cfg.Config) > 0 {
 		for i := range config.Cfg.Config {
