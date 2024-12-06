@@ -82,7 +82,7 @@ jobs:
         run: mkdir -p public/${{ needs.tag.outputs.tag }}
 
       - name: download binary
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: ${{ needs.tag.outputs.tag }}
           path: public/${{ needs.tag.outputs.tag }}
