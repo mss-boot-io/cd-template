@@ -25,6 +25,7 @@ type Config struct {
 	Service            string              `json:"service" yaml:"service"`
 	Version            string              `json:"version" yaml:"version"`
 	Hpa                Hpa                 `json:"hpa" yaml:"hpa"`
+	CronJob            CronJob             `json:"cronJob" yaml:"cronJob"`
 	Resources          map[string]Resource `json:"resources" yaml:"resources"`
 	Replicas           uint                `json:"replicas" yaml:"replicas"`
 	TestReplicas       uint                `json:"testReplicas" yaml:"testReplicas"`
@@ -129,6 +130,10 @@ type Hpa struct {
 	Enabled     bool `json:"enabled" yaml:"enabled"`
 	MinReplicas uint `json:"minReplicas" yaml:"minReplicas"`
 	MaxReplicas uint `json:"maxReplicas" yaml:"maxReplicas"`
+}
+
+type CronJob struct {
+	Schedule string `json:"schedule" yaml:"schedule"`
 }
 
 var (

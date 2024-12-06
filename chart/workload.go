@@ -296,6 +296,35 @@ func NewWorkloadChart(scope constructs.Construct, id string, props *cdk8s.ChartP
 				},
 			},
 		})
+	case "cronjob":
+		k8s.NewKubeCronJob(chart, jsii.String("cronjob"), &k8s.KubeCronJobProps{
+			Metadata: &k8s.ObjectMeta{
+				Name:   &config.Cfg.Service,
+				Labels: props.Labels,
+			},
+			Spec: &k8s.CronJobSpec{
+				Schedule: &config.Cfg.CronJob.Schedule,
+				JobTemplate: &k8s.JobTemplateSpec{
+					Metadata: &k8s.ObjectMeta{
+						Labels: props.Labels,
+					},
+					Spec: &k8s.JobSpec{
+						Template: &k8s.PodTemplateSpec{
+							Metadata: &k8s.ObjectMeta{
+								Labels:      props.Labels,
+								Annotations: &annotations,
+							},
+							Spec: &k8s.PodSpec{
+								ServiceAccountName: serviceAccountName,
+								Containers:         &containers,
+								Volumes:            &volumes,
+								ImagePullSecrets:   &imagePullSecrets,
+							},
+						},
+					},
+				},
+			},
+		})
 	default:
 		k8s.NewKubeDeployment(chart, jsii.String("deployment"), &k8s.KubeDeploymentProps{
 			Metadata: &k8s.ObjectMeta{
