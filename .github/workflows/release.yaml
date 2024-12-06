@@ -62,7 +62,7 @@ jobs:
           mv ${GOOS}_${GOARCH}.tar.gz artifact
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         env:
           CGO_ENABLED: 0
           GOOS: ${{ matrix.os }}
